@@ -1,0 +1,17 @@
+apiVersion: v2
+version: 0.1.0
+name: cloudflare-ddns
+appVersion: "1.15.1"
+type: application
+description: A Helm chart for Cloudflare DDNS
+home: https://github.com/favonia/cloudflare-ddns
+sources:
+  - https://github.com/favonia/cloudflare-ddns
+dependencies:
+  - name: common
+    version: ^2.31
+    repository: oci://registry-1.docker.io/bitnamicharts
+annotations:
+  helm.sh/images: |
+    - name: cloudflare-ddns
+      image: docker.io/favonia/cloudflare-ddns:1.15.1

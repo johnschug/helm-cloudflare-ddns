@@ -1,0 +1,47 @@
+{{- if and (.Values.networkPolicy.enabled) (eq .Values.networkPolicy.flavor "cilium") }}
+kind: CiliumNetworkPolicy
+apiVersion: cilium.io/v2
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.podLabels .Values.commonLabels) "context" .) }}
+  endpointSelector:
+    matchLabels: {{- include "common.labels.matchLabels" (dict "customLabels" $podLabels "context" $) | nindent 6 }}
+      app.kubernetes.io/component: deployment
+  {{- if .Values.networkPolicy.extraIngress }}
+  ingress: {{- include "common.tplvalues.render" (dict "value" .Values.networkPolicy.extraIngress "context" $) | nindent 4 }}
+  {{- else }}
+  ingress: []
+  {{- end }}
+  egress:
+    {{- if .Values.networkPolicy.allowExternalEgress }}
+    - toEntities:
+      - all
+    {{- else }}
+    - toEndpoints:
+      - matchLabels:
+          "k8s:io.kubernetes.pod.namespace": "kube-system"
+          "k8s:k8s-app": "kube-dns"
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+      - matchName: "cloudflare.com"
+      - matchName: "api.cloudflare.com"
+      - matchName: "cloudflare-dns.com"
+      - matchName: "api4.ipify.org"
+      - matchName: "api6.ipify.org"
+    {{- if .Values.networkPolicy.extraEgress }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.networkPolicy.extraEgress "context" $) | nindent 4 }}
+    {{- end }}
+    {{- end }}
+{{- end }}
