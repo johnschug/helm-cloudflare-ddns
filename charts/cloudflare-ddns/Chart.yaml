@@ -1,6 +1,7 @@
 apiVersion: v2
 version: 0.1.0
 name: cloudflare-ddns
+# renovate: image=docker.io/favonia/cloudflare-ddns
 appVersion: "1.15.1"
 type: application
 description: A Helm chart for Cloudflare DDNS
@@ -14,4 +15,4 @@ dependencies:
 annotations:
   helm.sh/images: |
     - name: cloudflare-ddns
-      image: docker.io/favonia/cloudflare-ddns:1.15.1
+      image: docker.io/favonia/cloudflare-ddns
